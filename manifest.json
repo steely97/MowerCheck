@@ -1,0 +1,19 @@
+{
+
+  "name": "MowerCheck",
+
+  "short_name": "MowerCheck",
+
+  "start_url": "index.html",
+
+  "display": "standalone",
+
+  "background_color": "#f2f7f2",
+
+  "theme_color": "#1b5e20",
+
+  "orientation": "portrait",
+
+  "description": "Daily inspection records for Ransomes MP653XC Fleet 00010"
+
+}
