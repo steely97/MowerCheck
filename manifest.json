@@ -4,16 +4,42 @@
 
   "short_name": "MowerCheck",
 
-  "start_url": "index.html",
+  "description": "Daily inspection records for the Ransomes MP653XC (Fleet No. 00010)",
+
+  "start_url": "./index.html",
+
+  "scope": "./",
 
   "display": "standalone",
+
+  "orientation": "portrait",
 
   "background_color": "#f2f7f2",
 
   "theme_color": "#1b5e20",
 
-  "orientation": "portrait",
+  "icons": [
 
-  "description": "Daily inspection records for Ransomes MP653XC Fleet 00010"
+    {
+
+      "src": "icon-192.png",
+
+      "sizes": "192x192",
+
+      "type": "image/png"
+
+    },
+
+    {
+
+      "src": "icon-512.png",
+
+      "sizes": "512x512",
+
+      "type": "image/png"
+
+    }
+
+  ]
 
 }
