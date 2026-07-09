@@ -194,4 +194,46 @@ textarea {
 
     display: none;
 
+}.welcome-card{
+    background:#1b5e20;
+    color:white;
+    border-radius:18px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 8px 18px rgba(0,0,0,.15);
+}
+
+.welcome{
+    font-size:20px;
+    margin:8px 0 20px;
+}
+
+#lastInspection{
+    background:rgba(255,255,255,.12);
+    border-radius:12px;
+    padding:12px;
+}
+
+.menu-card{
+    background:white;
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:16px;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    transition:.2s;
+}
+
+.menu-card:hover{
+    transform:translateY(-2px);
+}
+
+.menu-card h3{
+    margin:0;
+    color:#1b5e20;
+}
+
+.menu-card p{
+    margin:8px 0 0;
+    color:#666;
 }
