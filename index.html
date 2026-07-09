@@ -1,151 +1,86 @@
-<!DOCTYPE html> 
-
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>MowerCheck</title>
 
     <link rel="manifest" href="manifest.json">
-
     <link rel="stylesheet" href="style.css">
 
     <meta name="theme-color" content="#1b5e20">
-
 </head>
 
 <body>
 
-<header>
-
+<header class="header">
     <h1>🚜 MowerCheck</h1>
-
-    <div class="info">
-
-        <p><strong>Machine:</strong> Ransomes MP653XC</p>
-
-        <p><strong>Fleet No:</strong> 00010</p>
-
-        <p><strong>Operator:</strong> Adam</p>
-
-    </div>
-
+    <p id="greeting">Good Morning, Adam</p>
 </header>
 
 <main>
 
-<section id="home">
+    <section class="card" id="lastInspectionCard">
+        <h2>Last Inspection</h2>
 
-<section id="home">
+        <p id="lastInspectionText">
+            No inspection completed today.
+        </p>
+    </section>
 
-<div class="welcome-card">
+    <section class="menu">
 
-<h2>🚜 MowerCheck</h2>
+        <div class="menu-card" id="newInspection">
+            <h2>📝 New Inspection</h2>
+            <p>Complete today's machine inspection</p>
+        </div>
 
-<p class="welcome">
-Good Morning, Adam
-</p>
+        <div class="menu-card" id="manageMachines">
+            <h2>🚜 Manage Machines</h2>
+            <p>Add, edit and remove machine models</p>
+        </div>
 
-<div id="lastInspection">
+        <div class="menu-card" id="history">
+            <h2>📋 Inspection History</h2>
+            <p>View previous inspections</p>
+        </div>
 
-<p><strong>Last Inspection</strong></p>
+        <div class="menu-card" id="settings">
+            <h2>⚙️ Settings</h2>
+            <p>Operator • Backup • About</p>
+        </div>
 
-<p>No inspection completed today.</p>
+    </section>
+<section id="machinesScreen" class="hidden">
 
-</div>
+    <h2>🚜 Manage Machines</h2>
 
-</div>
+    <div id="machineList"></div>
 
+    <div class="card">
 
-<div class="menu-card" id="newCheck">
+        <label for="newMachine">New Machine Model</label>
 
-<h3>📝 New Inspection</h3>
+        <input
+            id="newMachine"
+            type="text"
+            placeholder="e.g. Toro Groundsmaster 3500D">
 
-<p>Complete today's machine inspection</p>
+        <button id="saveMachine">
+            Add Machine
+        </button>
 
-</div>
+    </div>
 
-
-<div class="menu-card" id="manageMachines">
-
-<h3>🚜 Manage Machines</h3>
-
-<p>Add and edit machine models</p>
-
-</div>
-
-
-<div class="menu-card" id="viewHistory">
-
-<h3>📋 Inspection History</h3>
-
-<p>View previous inspections</p>
-
-</div>
-
-
-<div class="menu-card" id="settings">
-
-<h3>⚙️ Settings</h3>
-
-<p>Operator, backup & restore</p>
-
-</div>
+    <button id="backHome">
+        Back
+    </button>
 
 </section>
-
-<section id="checkForm" class="hidden">
-
-<h2>Morning Inspection</h2>
-
-<label>Hour Meter</label>
-
-<input type="number" id="hours" placeholder="Enter hours">
-
-<div id="checklist">
-
-</div>
-
-<label>Notes</label>
-
-<textarea id="notes" rows="5"></textarea>
-
-<button id="saveCheck">
-
-Save Inspection
-
-</button>
-
-<button id="cancel">
-
-Back
-
-</button>
-
-</section>
-
-<section id="history" class="hidden">
-
-<h2>Inspection History</h2>
-
-<div id="historyList"></div>
-
-<button id="backHome">
-
-Back
-
-</button>
-
-</section>
-
 </main>
 
+<script src="machines.js"></script>
 <script src="app.js"></script>
 
 </body>
-
 </html>
