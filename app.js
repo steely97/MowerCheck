@@ -6,9 +6,10 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     const screens = {
-        home: document.getElementById("home"),
-        machines: document.getElementById("machinesScreen")
-    };
+    home: document.getElementById("home"),
+    machines: document.getElementById("machinesScreen"),
+    inspection: document.getElementById("inspectionScreen")
+};
 
     function showScreen(screenName) {
 
@@ -22,8 +23,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+}
     // Dashboard buttons
+const newInspection = document.getElementById("newInspection");
 
+if (newInspection) {
+
+    newInspection.addEventListener("click", () => {
+
+        populateMachineList();
+
+        showScreen("inspection");
+
+    });
+
+}
     const manageMachines = document.getElementById("manageMachines");
 
     if (manageMachines) {
@@ -49,7 +63,18 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
     }
+const inspectionBack =
+document.getElementById("inspectionBack");
 
+if (inspectionBack) {
+
+    inspectionBack.addEventListener("click", () => {
+
+        showScreen("home");
+
+    });
+
+}
     // Add Machine
 
     const saveButton = document.getElementById("saveMachine");
@@ -116,5 +141,25 @@ function removeMachine(index) {
     deleteMachine(index);
 
     renderMachines();
+
+}function populateMachineList() {
+
+    const select = document.getElementById("machineSelect");
+
+    if (!select) return;
+
+    select.innerHTML = "";
+
+    getMachines().forEach(machine => {
+
+        const option = document.createElement("option");
+
+        option.value = machine;
+
+        option.textContent = machine;
+
+        select.appendChild(option);
+
+    });
 
 }
