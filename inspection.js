@@ -1,13 +1,13 @@
-// MowerCheck Inspection Logic (FINAL CLEAN VERSION)
+// MowerCheck Inspection Logic (FULL UPDATED VERSION)
 
 var inspectionResults = {};
 
 // CHECKLIST DATA
 var checklistData = {
-  "Fluids": ["Engine Oil","Hydraulic Oil","Coolant","Fuel Level"],
-  "Machine": ["Blades Condition","Tyres","Belts","Battery"],
-  "Safety": ["Emergency Stop","Guards","Seat Switch","Brakes"],
-  "Final Checks": ["Cleanliness","No Leaks","Ready for Operation"]
+  "Fluids": ["Engine Oil", "Hydraulic Oil", "Coolant", "Fuel Level"],
+  "Machine": ["Blades Condition", "Tyres", "Belts", "Battery"],
+  "Safety": ["Emergency Stop", "Guards", "Seat Switch", "Brakes"],
+  "Final Checks": ["Cleanliness", "No Leaks", "Ready for Operation"]
 };
 
 // CREATE ELEMENT
@@ -18,7 +18,7 @@ function createEl(tag, className, text) {
   return el;
 }
 
-// SET RESULT
+// SAVE RESULT
 function setResult(group, item, status) {
   if (!inspectionResults[group]) inspectionResults[group] = {};
   if (!inspectionResults[group][item]) {
@@ -27,7 +27,7 @@ function setResult(group, item, status) {
   inspectionResults[group][item].status = status;
 }
 
-// SET NOTES
+// SAVE NOTES
 function setNotes(group, item, notes) {
   if (!inspectionResults[group]) inspectionResults[group] = {};
   if (!inspectionResults[group][item]) {
@@ -57,6 +57,8 @@ function createChecklistItem(group, item) {
     setResult(group, item, 'pass');
     passBtn.classList.add('pass-active');
     failBtn.classList.remove('fail-active');
+    passBtn.textContent = 'Passed ✓';
+    failBtn.textContent = 'Fail';
     notes.style.display = 'none';
   };
 
@@ -64,6 +66,8 @@ function createChecklistItem(group, item) {
     setResult(group, item, 'fail');
     failBtn.classList.add('fail-active');
     passBtn.classList.remove('pass-active');
+    failBtn.textContent = 'Failed ✕';
+    passBtn.textContent = 'Pass';
     notes.style.display = 'block';
   };
 
@@ -107,26 +111,39 @@ function renderInspectionChecklist(containerId) {
     container.appendChild(createGroupSection(group, checklistData[group]));
   }
 
-  // SAVE BUTTON
   var saveBtn = createEl('button', 'primary-btn', 'Complete Inspection');
   saveBtn.type = 'button';
 
   saveBtn.onclick = function () {
-    var history = getData('inspectionHistory');
+    var machineField = document.getElementById('inspectionMachine');
+    var fleetField = document.getElementById('fleetNumber');
+    var hourField = document.getElementById('hourMeter');
+    var operatorField = document.getElementById('operatorName');
+
+    if (!machineField || !fleetField || !hourField || !operatorField) return;
+
+    var history = window.getData ? window.getData('inspectionHistory') : [];
 
     var record = {
-      machine: document.getElementById('inspectionMachine').value,
-      fleetNumber: document.getElementById('fleetNumber').value,
-      hourMeter: document.getElementById('hourMeter').value,
-      operator: document.getElementById('operatorName').value,
+      machine: machineField.value,
+      fleetNumber: fleetField.value,
+      hourMeter: hourField.value,
+      operator: operatorField.value,
       checklist: inspectionResults,
       date: new Date().toLocaleString()
     };
 
     history.push(record);
-    saveData('inspectionHistory', history);
+
+    if (window.saveData) {
+      window.saveData('inspectionHistory', history);
+    } else {
+      localStorage.setItem('inspectionHistory', JSON.stringify(history));
+    }
 
     alert('Inspection saved');
+
+    resetInspectionFlow();
 
     if (typeof showView === 'function') {
       showView('dashboard');
@@ -136,7 +153,64 @@ function renderInspectionChecklist(containerId) {
   container.appendChild(saveBtn);
 }
 
-// CREATE CONTAINER ONLY
+// RESET INSPECTION SCREEN AFTER SAVE
+function resetInspectionFlow() {
+  var machineSelect = document.getElementById('inspectionMachine');
+  var fleetField = document.getElementById('fleetNumber');
+  var hourInput = document.getElementById('hourMeter');
+  var nextBtn = document.getElementById('nextInspectionBtn');
+  var checklistContainer = document.getElementById('checklistContainer');
+
+  if (machineSelect) machineSelect.disabled = false;
+  if (hourInput) {
+    hourInput.disabled = false;
+    hourInput.value = '';
+  }
+  if (fleetField) {
+    fleetField.readOnly = true;
+  }
+  if (nextBtn) {
+    nextBtn.disabled = true;
+    nextBtn.style.display = 'block';
+  }
+  if (checklistContainer) {
+    checklistContainer.innerHTML = '';
+  }
+}
+
+// NEXT BUTTON LOGIC
+function initNextButton() {
+  var nextBtn = document.getElementById('nextInspectionBtn');
+  var hourInput = document.getElementById('hourMeter');
+  var machineSelect = document.getElementById('inspectionMachine');
+  var fleetField = document.getElementById('fleetNumber');
+
+  if (!nextBtn || !hourInput) return;
+
+  nextBtn.disabled = true;
+
+  hourInput.addEventListener('input', function () {
+    if (hourInput.value && Number(hourInput.value) > 0) {
+      nextBtn.disabled = false;
+    } else {
+      nextBtn.disabled = true;
+    }
+  });
+
+  nextBtn.addEventListener('click', function () {
+    if (nextBtn.disabled) return;
+
+    if (machineSelect) machineSelect.disabled = true;
+    if (hourInput) hourInput.disabled = true;
+    if (fleetField) fleetField.readOnly = true;
+
+    nextBtn.style.display = 'none';
+
+    renderInspectionChecklist('checklistContainer');
+  });
+}
+
+// PREP CHECKLIST CONTAINER
 function initChecklist() {
   var view = document.getElementById('inspectionView');
   if (!view) return;
@@ -150,52 +224,12 @@ function initChecklist() {
   }
 }
 
-// NEXT BUTTON LOGIC (MAIN FLOW)
-function initNextButton() {
-  var nextBtn = document.getElementById('nextInspectionBtn');
-  var hourInput = document.getElementById('hourMeter');
-  var machineSelect = document.getElementById('inspectionMachine');
-  var fleetField = document.getElementById('fleetNumber');
-
-  if (!nextBtn || !hourInput) return;
-
-  // Start disabled
-  nextBtn.disabled = true;
-
-  // Enable when hours entered
-  hourInput.addEventListener('input', function () {
-    if (hourInput.value && hourInput.value > 0) {
-      nextBtn.disabled = false;
-    } else {
-      nextBtn.disabled = true;
-    }
-  });
-
-  // On click
-  nextBtn.addEventListener('click', function () {
-    if (nextBtn.disabled) return;
-
-    // 🔒 Lock inputs
-    if (machineSelect) machineSelect.disabled = true;
-    if (hourInput) hourInput.disabled = true;
-    if (fleetField) fleetField.setAttribute('readonly', true);
-
-    // Hide button
-    nextBtn.style.display = 'none';
-
-    // Render checklist
-    if (typeof renderInspectionChecklist === 'function') {
-      renderInspectionChecklist('checklistContainer');
-    }
-  });
-}
-
 // INIT
 window.addEventListener('load', function () {
   initChecklist();
   initNextButton();
 });
 
-// EXPORT
+// EXPORTS
 window.renderInspectionChecklist = renderInspectionChecklist;
 window.inspectionResults = inspectionResults;
