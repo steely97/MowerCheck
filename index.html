@@ -1,121 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MowerCheck</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MowerCheck</title>
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0b3d2e" />
 
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
+  <!-- iOS / Install -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MowerCheck">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 
-    <meta name="theme-color" content="#1b5e20">
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
 <body>
 
-<header class="header">
-    <h1>🚜 MowerCheck</h1>
-    <p id="greeting">Good Morning, Adam</p>
-</header>
+  <div class="app-container">
 
-<main>
+    <!-- Header -->
+    <header class="header">
+      <h1>MowerCheck</h1>
+    </header>
 
-    <section class="card" id="lastInspectionCard">
-        <h2>Last Inspection</h2>
+    <!-- DASHBOARD -->
+    <main id="dashboard" class="view active">
 
-        <p id="lastInspectionText">
-            No inspection completed today.
-        </p>
-    </section>
+      <section class="welcome-card">
+        <h2>Welcome back 👋</h2>
+        <p id="lastInspection">Last inspection: None yet</p>
+      </section>
 
-    <section class="menu">
+      <section class="card-grid">
 
-        <div class="menu-card" id="newInspection">
-            <h2>📝 New Inspection</h2>
-            <p>Complete today's machine inspection</p>
+        <div class="card primary" id="newInspectionBtn">
+          <div class="card-icon icon-green">
+            <i data-lucide="clipboard-check"></i>
+          </div>
+          <h3>New Inspection</h3>
+          <p>Start a new machine check</p>
         </div>
 
-        <div class="menu-card" id="manageMachines">
-            <h2>🚜 Manage Machines</h2>
-            <p>Add, edit and remove machine models</p>
+        <div class="card" id="manageMachinesBtn">
+          <div class="card-icon icon-blue">
+            <i data-lucide="tractor"></i>
+          </div>
+          <h3>Manage Machines</h3>
+          <p>Add or remove machines</p>
         </div>
 
-        <div class="menu-card" id="history">
-            <h2>📋 Inspection History</h2>
-            <p>View previous inspections</p>
+        <div class="card" id="historyBtn">
+          <div class="card-icon icon-orange">
+            <i data-lucide="history"></i>
+          </div>
+          <h3>History</h3>
+          <p>View past inspections</p>
         </div>
 
-        <div class="menu-card" id="settings">
-            <h2>⚙️ Settings</h2>
-            <p>Operator • Backup • About</p>
+        <div class="card" id="settingsBtn">
+          <div class="card-icon icon-grey">
+            <i data-lucide="settings"></i>
+          </div>
+          <h3>Settings</h3>
+          <p>App preferences</p>
         </div>
 
-    </section>
-<section id="machinesScreen" class="hidden">
+      </section>
 
-    <h2>🚜 Manage Machines</h2>
+    </main>
 
-    <div id="machineList"></div>
+    <!-- MACHINES -->
+    <main id="machinesView" class="view">
+      <div class="view-header">
+        <button class="back-btn" data-target="dashboard">← Back</button>
+        <h2>Machines</h2>
+      </div>
 
-    <div class="card">
-
-        <label for="newMachine">New Machine Model</label>
-
-        <input
-            id="newMachine"
-            type="text"
-            placeholder="e.g. Toro Groundsmaster 3500D">
-
-        <button id="saveMachine">
-            Add Machine
+      <div class="form-group">
+        <input type="text" id="machineName" placeholder="Machine name" />
+        <input type="text" id="fleetNumberInput" placeholder="Fleet number" />
+        <button id="addMachineBtn" class="primary-btn" type="button">
+          Add Machine
         </button>
+      </div>
 
-    </div>
+      <ul id="machineList" class="list"></ul>
+    </main>
 
-    <button id="backHome">
-        Back
-    </button>
+    <!-- INSPECTION -->
+    <main id="inspectionView" class="view">
+      <div class="view-header">
+        <button class="back-btn" data-target="dashboard">← Back</button>
+        <h2>New Inspection</h2>
+      </div>
 
-</section>
-<section id="inspectionScreen" class="hidden">
+      <div class="form-group">
+        <label>Select Machine</label>
+        <select id="inspectionMachine"></select>
+      </div>
 
-    <h2>📝 New Inspection</h2>
+      <div class="form-group">
+        <label>Operator</label>
+        <input type="text" id="operatorName" readonly />
+      </div>
 
-    <div class="card">
+      <div class="form-group">
+        <label>Fleet Number</label>
+        <input type="text" id="fleetNumber" readonly />
+      </div>
 
-        <label for="machineSelect">Machine Model</label>
+      <div class="form-group">
+        <label>Hour Meter</label>
+        <input type="number" id="hourMeter" />
+      </div>
 
-        <select id="machineSelect"></select>
+      <!-- NEXT BUTTON -->
+      <button id="nextInspectionBtn" class="primary-btn" type="button" disabled>
+        Next
+      </button>
 
-        <label for="fleetNumber">Fleet Number</label>
+      <!-- CHECKLIST -->
+      <div id="checklistContainer"></div>
 
-        <input
-            type="text"
-            id="fleetNumber"
-            placeholder="Enter fleet number">
+    </main>
 
-        <label for="hourMeter">Hour Meter</label>
+    <!-- HISTORY -->
+    <main id="historyView" class="view">
+      <div class="view-header">
+        <button class="back-btn" data-target="dashboard">← Back</button>
+        <h2>History</h2>
+      </div>
 
-        <input
-            type="number"
-            id="hourMeter"
-            placeholder="Enter hour meter">
+      <ul id="historyList" class="list"></ul>
+    </main>
 
-        <button id="startInspection">
-            Start Inspection
+    <!-- SETTINGS -->
+    <main id="settingsView" class="view">
+      <div class="view-header">
+        <button class="back-btn" data-target="dashboard">← Back</button>
+        <h2>Settings</h2>
+      </div>
+<div class="settings-item">
+  <button id="installAppBtn" class="primary-btn" style="display:none;">
+    Install App
+  </button>
+</div>
+      <div class="settings-item">
+        <button id="clearDataBtn" class="danger-btn" type="button">
+          Clear All Data
         </button>
+      </div>
+    </main>
 
-    </div>
+  </div>
 
-    <button id="inspectionBack">
-        Back
-    </button>
+  <!-- Scripts -->
+  <script src="app.js" defer></script>
+  <script src="machines.js" defer></script>
+  <script src="inspection.js" defer></script>
+  <script src="history.js" defer></script>
+  <script src="settings.js" defer></script>
 
-</section>
-</main>
+  <!-- Activate Icons -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    });
+  </script>
 
-<script src="machines.js"></script>
-<script src="app.js"></script>
+  <!-- Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js');
+      });
+    }
+  </script>
 
 </body>
 </html>
