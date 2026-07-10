@@ -1,8 +1,7 @@
-// MowerCheck Inspection Logic (FULL UPDATED VERSION)
+// MowerCheck Inspection Logic (PASS / ADVISORY / FAIL - ROBUST SAVE)
 
 var inspectionResults = {};
 
-// CHECKLIST DATA
 var checklistData = {
   "Fluids": ["Engine Oil", "Hydraulic Oil", "Coolant", "Fuel Level"],
   "Machine": ["Blades Condition", "Tyres", "Belts", "Battery"],
@@ -10,7 +9,6 @@ var checklistData = {
   "Final Checks": ["Cleanliness", "No Leaks", "Ready for Operation"]
 };
 
-// CREATE ELEMENT
 function createEl(tag, className, text) {
   var el = document.createElement(tag);
   if (className) el.className = className;
@@ -18,7 +16,28 @@ function createEl(tag, className, text) {
   return el;
 }
 
-// SAVE RESULT
+function clearInspectionResults() {
+  Object.keys(inspectionResults).forEach(function (key) {
+    delete inspectionResults[key];
+  });
+}
+
+function initialiseInspectionResults() {
+  clearInspectionResults();
+
+  for (var group in checklistData) {
+    inspectionResults[group] = {};
+
+    for (var i = 0; i < checklistData[group].length; i++) {
+      var item = checklistData[group][i];
+      inspectionResults[group][item] = {
+        status: null,
+        notes: ""
+      };
+    }
+  }
+}
+
 function setResult(group, item, status) {
   if (!inspectionResults[group]) inspectionResults[group] = {};
   if (!inspectionResults[group][item]) {
@@ -27,7 +46,6 @@ function setResult(group, item, status) {
   inspectionResults[group][item].status = status;
 }
 
-// SAVE NOTES
 function setNotes(group, item, notes) {
   if (!inspectionResults[group]) inspectionResults[group] = {};
   if (!inspectionResults[group][item]) {
@@ -36,7 +54,17 @@ function setNotes(group, item, notes) {
   inspectionResults[group][item].notes = notes;
 }
 
-// CREATE CHECK ITEM
+function allChecksCompleted() {
+  for (var group in inspectionResults) {
+    for (var item in inspectionResults[group]) {
+      if (!inspectionResults[group][item].status) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 function createChecklistItem(group, item) {
   var container = createEl('div', 'check-item');
 
@@ -44,9 +72,11 @@ function createChecklistItem(group, item) {
   var btnWrap = createEl('div', 'check-buttons');
 
   var passBtn = createEl('button', 'pass-btn', 'Pass');
+  var advisoryBtn = createEl('button', 'amber-btn', 'Advisory');
   var failBtn = createEl('button', 'fail-btn', 'Fail');
 
   passBtn.type = 'button';
+  advisoryBtn.type = 'button';
   failBtn.type = 'button';
 
   var notes = createEl('textarea', 'check-notes');
@@ -55,19 +85,43 @@ function createChecklistItem(group, item) {
 
   passBtn.onclick = function () {
     setResult(group, item, 'pass');
+
     passBtn.classList.add('pass-active');
+    advisoryBtn.classList.remove('amber-active');
     failBtn.classList.remove('fail-active');
+
     passBtn.textContent = 'Passed ✓';
+    advisoryBtn.textContent = 'Advisory';
     failBtn.textContent = 'Fail';
+
     notes.style.display = 'none';
+  };
+
+  advisoryBtn.onclick = function () {
+    setResult(group, item, 'advisory');
+
+    advisoryBtn.classList.add('amber-active');
+    passBtn.classList.remove('pass-active');
+    failBtn.classList.remove('fail-active');
+
+    advisoryBtn.textContent = 'Advisory !';
+    passBtn.textContent = 'Pass';
+    failBtn.textContent = 'Fail';
+
+    notes.style.display = 'block';
   };
 
   failBtn.onclick = function () {
     setResult(group, item, 'fail');
+
     failBtn.classList.add('fail-active');
     passBtn.classList.remove('pass-active');
+    advisoryBtn.classList.remove('amber-active');
+
     failBtn.textContent = 'Failed ✕';
     passBtn.textContent = 'Pass';
+    advisoryBtn.textContent = 'Advisory';
+
     notes.style.display = 'block';
   };
 
@@ -76,6 +130,7 @@ function createChecklistItem(group, item) {
   };
 
   btnWrap.appendChild(passBtn);
+  btnWrap.appendChild(advisoryBtn);
   btnWrap.appendChild(failBtn);
 
   container.appendChild(title);
@@ -85,7 +140,6 @@ function createChecklistItem(group, item) {
   return container;
 }
 
-// CREATE GROUP
 function createGroupSection(groupName, items) {
   var section = createEl('div', 'check-group');
   var header = createEl('h3', 'check-group-title', groupName);
@@ -99,13 +153,12 @@ function createGroupSection(groupName, items) {
   return section;
 }
 
-// RENDER CHECKLIST
 function renderInspectionChecklist(containerId) {
   var container = document.getElementById(containerId);
   if (!container) return;
 
   container.innerHTML = '';
-  inspectionResults = {};
+  initialiseInspectionResults();
 
   for (var group in checklistData) {
     container.appendChild(createGroupSection(group, checklistData[group]));
@@ -122,6 +175,11 @@ function renderInspectionChecklist(containerId) {
 
     if (!machineField || !fleetField || !hourField || !operatorField) return;
 
+    if (!allChecksCompleted()) {
+      alert('Please complete every checklist item before saving.');
+      return;
+    }
+
     var history = window.getData ? window.getData('inspectionHistory') : [];
 
     var record = {
@@ -129,7 +187,7 @@ function renderInspectionChecklist(containerId) {
       fleetNumber: fleetField.value,
       hourMeter: hourField.value,
       operator: operatorField.value,
-      checklist: inspectionResults,
+      checklist: JSON.parse(JSON.stringify(inspectionResults)),
       date: new Date().toLocaleString()
     };
 
@@ -139,6 +197,10 @@ function renderInspectionChecklist(containerId) {
       window.saveData('inspectionHistory', history);
     } else {
       localStorage.setItem('inspectionHistory', JSON.stringify(history));
+    }
+
+    if (typeof updateLastInspection === 'function') {
+      updateLastInspection();
     }
 
     alert('Inspection saved');
@@ -153,7 +215,6 @@ function renderInspectionChecklist(containerId) {
   container.appendChild(saveBtn);
 }
 
-// RESET INSPECTION SCREEN AFTER SAVE
 function resetInspectionFlow() {
   var machineSelect = document.getElementById('inspectionMachine');
   var fleetField = document.getElementById('fleetNumber');
@@ -162,23 +223,28 @@ function resetInspectionFlow() {
   var checklistContainer = document.getElementById('checklistContainer');
 
   if (machineSelect) machineSelect.disabled = false;
+
   if (hourInput) {
     hourInput.disabled = false;
     hourInput.value = '';
   }
+
   if (fleetField) {
     fleetField.readOnly = true;
   }
+
   if (nextBtn) {
     nextBtn.disabled = true;
     nextBtn.style.display = 'block';
   }
+
   if (checklistContainer) {
     checklistContainer.innerHTML = '';
   }
+
+  clearInspectionResults();
 }
 
-// NEXT BUTTON LOGIC
 function initNextButton() {
   var nextBtn = document.getElementById('nextInspectionBtn');
   var hourInput = document.getElementById('hourMeter');
@@ -210,7 +276,6 @@ function initNextButton() {
   });
 }
 
-// PREP CHECKLIST CONTAINER
 function initChecklist() {
   var view = document.getElementById('inspectionView');
   if (!view) return;
@@ -224,12 +289,10 @@ function initChecklist() {
   }
 }
 
-// INIT
 window.addEventListener('load', function () {
   initChecklist();
   initNextButton();
 });
 
-// EXPORTS
 window.renderInspectionChecklist = renderInspectionChecklist;
 window.inspectionResults = inspectionResults;
